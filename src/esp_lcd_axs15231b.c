@@ -165,7 +165,7 @@ static esp_err_t tx_color(axs15231b_panel_t *axs15231b, esp_lcd_panel_io_handle_
 
 static esp_err_t panel_axs15231b_del(esp_lcd_panel_t *panel)
 {
-    axs15231b_panel_t *axs15231b = __containerof(panel, axs15231b_panel_t, base);
+    axs15231b_panel_t *axs15231b = (axs15231b_panel_t *)panel;
 
     if (axs15231b->reset_gpio_num >= 0) {
         gpio_reset_pin(axs15231b->reset_gpio_num);
@@ -177,7 +177,7 @@ static esp_err_t panel_axs15231b_del(esp_lcd_panel_t *panel)
 
 static esp_err_t panel_axs15231b_reset(esp_lcd_panel_t *panel)
 {
-    axs15231b_panel_t *axs15231b = __containerof(panel, axs15231b_panel_t, base);
+    axs15231b_panel_t *axs15231b = (axs15231b_panel_t *)panel;
     esp_lcd_panel_io_handle_t io = axs15231b->io;
 
     // perform hardware reset
@@ -233,7 +233,7 @@ static const axs15231b_lcd_init_cmd_t vendor_specific_init_default[] = {
 
 static esp_err_t panel_axs15231b_init(esp_lcd_panel_t *panel)
 {
-    axs15231b_panel_t *axs15231b = __containerof(panel, axs15231b_panel_t, base);
+    axs15231b_panel_t *axs15231b = (axs15231b_panel_t *)panel;
     esp_lcd_panel_io_handle_t io = axs15231b->io;
 
     // LCD goes into sleep mode and display will be turned off after power on reset, exit sleep mode first
@@ -286,7 +286,7 @@ static esp_err_t panel_axs15231b_init(esp_lcd_panel_t *panel)
 
 static esp_err_t panel_axs15231b_draw_bitmap(esp_lcd_panel_t *panel, int x_start, int y_start, int x_end, int y_end, const void *color_data)
 {
-    axs15231b_panel_t *axs15231b = __containerof(panel, axs15231b_panel_t, base);
+    axs15231b_panel_t *axs15231b = (axs15231b_panel_t *)panel;
     assert((x_start < x_end) && (y_start < y_end) && "start position must be smaller than end position");
     esp_lcd_panel_io_handle_t io = axs15231b->io;
 
@@ -325,7 +325,7 @@ static esp_err_t panel_axs15231b_draw_bitmap(esp_lcd_panel_t *panel, int x_start
 
 static esp_err_t panel_axs15231b_invert_color(esp_lcd_panel_t *panel, bool invert_color_data)
 {
-    axs15231b_panel_t *axs15231b = __containerof(panel, axs15231b_panel_t, base);
+    axs15231b_panel_t *axs15231b = (axs15231b_panel_t *)panel;
     esp_lcd_panel_io_handle_t io = axs15231b->io;
     int command = 0;
     if (invert_color_data) {
@@ -339,7 +339,8 @@ static esp_err_t panel_axs15231b_invert_color(esp_lcd_panel_t *panel, bool inver
 
 static esp_err_t panel_axs15231b_mirror(esp_lcd_panel_t *panel, bool mirror_x, bool mirror_y)
 {
-    axs15231b_panel_t *axs15231b = __containerof(panel, axs15231b_panel_t, base);
+
+    axs15231b_panel_t *axs15231b = (axs15231b_panel_t *)panel;
     esp_lcd_panel_io_handle_t io = axs15231b->io;
     if (mirror_x) {
         axs15231b->madctl_val |= LCD_CMD_MX_BIT;
@@ -359,7 +360,8 @@ static esp_err_t panel_axs15231b_mirror(esp_lcd_panel_t *panel, bool mirror_x, b
 
 static esp_err_t panel_axs15231b_swap_xy(esp_lcd_panel_t *panel, bool swap_axes)
 {
-    axs15231b_panel_t *axs15231b = __containerof(panel, axs15231b_panel_t, base);
+   
+    axs15231b_panel_t *axs15231b = (axs15231b_panel_t *)panel;
     esp_lcd_panel_io_handle_t io = axs15231b->io;
     if (swap_axes) {
         axs15231b->madctl_val |= LCD_CMD_MV_BIT;
@@ -374,7 +376,8 @@ static esp_err_t panel_axs15231b_swap_xy(esp_lcd_panel_t *panel, bool swap_axes)
 
 static esp_err_t panel_axs15231b_set_gap(esp_lcd_panel_t *panel, int x_gap, int y_gap)
 {
-    axs15231b_panel_t *axs15231b = __containerof(panel, axs15231b_panel_t, base);
+    
+    axs15231b_panel_t *axs15231b = (axs15231b_panel_t *)panel;
     axs15231b->x_gap = x_gap;
     axs15231b->y_gap = y_gap;
     return ESP_OK;
@@ -382,7 +385,8 @@ static esp_err_t panel_axs15231b_set_gap(esp_lcd_panel_t *panel, int x_gap, int 
 
 static esp_err_t panel_axs15231b_disp_off(esp_lcd_panel_t *panel, bool off)
 {
-    axs15231b_panel_t *axs15231b = __containerof(panel, axs15231b_panel_t, base);
+    
+    axs15231b_panel_t *axs15231b = (axs15231b_panel_t *)panel;
     esp_lcd_panel_io_handle_t io = axs15231b->io;
     int command = 0;
     if (off) {

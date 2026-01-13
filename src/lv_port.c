@@ -607,7 +607,9 @@ static void lvgl_port_touchpad_read(lv_indev_drv_t *indev_drv, lv_indev_data_t *
 static void lvgl_port_tick_increment(void *arg)
 {
     /* Tell LVGL how many milliseconds have elapsed */
-    lv_tick_inc(lvgl_port_timer_period_ms);
+    
+    /* We are using LV_TICK_CUSTOM in lv_conf.h, so we don't need to call this.
+    We leave the function empty to satisfy the timer callback. */
 }
 
 static esp_err_t lvgl_port_tick_init(void)

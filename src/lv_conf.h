@@ -86,10 +86,10 @@
 
 /*Use a custom tick source that tells the elapsed time in milliseconds.
  *It removes the need to manually update the tick with `lv_tick_inc()`)*/
-#define LV_TICK_CUSTOM 0
+#define LV_TICK_CUSTOM 1
 #if LV_TICK_CUSTOM
-    #define LV_TICK_CUSTOM_INCLUDE "Arduino.h"         /*Header for the system time function*/
-    #define LV_TICK_CUSTOM_SYS_TIME_EXPR (millis())    /*Expression evaluating to current system time in ms*/
+    #define LV_TICK_CUSTOM_INCLUDE "esp_timer.h"         /*Header for the system time function*/
+    #define LV_TICK_CUSTOM_SYS_TIME_EXPR ((esp_timer_get_time() / 1000LL))    /*Expression evaluating to current system time in ms*/
     /*If using lvgl as ESP32 component*/
     // #define LV_TICK_CUSTOM_INCLUDE "esp_timer.h"
     // #define LV_TICK_CUSTOM_SYS_TIME_EXPR ((esp_timer_get_time() / 1000LL))
@@ -735,8 +735,10 @@
  * DEMO USAGE
  ====================*/
 
+
+
 /*Show some widget. It might be required to increase `LV_MEM_SIZE` */
-#define LV_USE_DEMO_WIDGETS 1
+#define LV_USE_DEMO_WIDGETS 0
 #if LV_USE_DEMO_WIDGETS
 #define LV_DEMO_WIDGETS_SLIDESHOW 0
 #endif
@@ -745,23 +747,23 @@
 #define LV_USE_DEMO_KEYPAD_AND_ENCODER 0
 
 /*Benchmark your system*/
-#define LV_USE_DEMO_BENCHMARK 1
+#define LV_USE_DEMO_BENCHMARK 0
 #if LV_USE_DEMO_BENCHMARK
 /*Use RGB565A8 images with 16 bit color depth instead of ARGB8565*/
 #define LV_DEMO_BENCHMARK_RGB565A8 0
 #endif
 
 /*Stress test for LVGL*/
-#define LV_USE_DEMO_STRESS 1
+#define LV_USE_DEMO_STRESS 0
 
 /*Music player demo*/
-#define LV_USE_DEMO_MUSIC 1
+#define LV_USE_DEMO_MUSIC 0
 #if LV_USE_DEMO_MUSIC
     #define LV_DEMO_MUSIC_SQUARE    0
     #define LV_DEMO_MUSIC_LANDSCAPE 0
     #define LV_DEMO_MUSIC_ROUND     0
     #define LV_DEMO_MUSIC_LARGE     0
-    #define LV_DEMO_MUSIC_AUTO_PLAY 1
+    #define LV_DEMO_MUSIC_AUTO_PLAY 0
 #endif
 
 /*--END OF LV_CONF_H--*/

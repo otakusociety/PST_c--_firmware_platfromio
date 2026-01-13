@@ -16,7 +16,8 @@
 
 #ifndef LV_CONF_H
 #define LV_CONF_H
-
+#include <ff.h>
+#define DIR FF_DIR
 #include <stdint.h>
 
 /*====================

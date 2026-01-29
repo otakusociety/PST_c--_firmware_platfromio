@@ -1,4 +1,3 @@
-
 /*
  * SPDX-FileCopyrightText: 2022-2024 Espressif Systems (Shanghai) CO LTD
  *
@@ -17,7 +16,7 @@
 #include "driver/i2c.h"
 #include "lvgl.h"
 #include "lv_port.h"
-
+#include "pincfg.h"
 /**************************************************************************************************
  *  pinout
  **************************************************************************************************/
@@ -30,21 +29,27 @@
 /////////////////////////////////////////// LCD spec of QSPI /////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-#define EXAMPLE_PIN_NUM_QSPI_CS         (GPIO_NUM_45)
-#define EXAMPLE_PIN_NUM_QSPI_PCLK       (GPIO_NUM_47)
-#define EXAMPLE_PIN_NUM_QSPI_DATA0      (GPIO_NUM_21)
-#define EXAMPLE_PIN_NUM_QSPI_DATA1      (GPIO_NUM_48)
-#define EXAMPLE_PIN_NUM_QSPI_DATA2      (GPIO_NUM_40)
-#define EXAMPLE_PIN_NUM_QSPI_DATA3      (GPIO_NUM_39)
-#define EXAMPLE_PIN_NUM_QSPI_RST        (GPIO_NUM_NC)
-#define EXAMPLE_PIN_NUM_QSPI_DC         (GPIO_NUM_8)
-#define EXAMPLE_PIN_NUM_QSPI_TE         (GPIO_NUM_38)
-#define EXAMPLE_PIN_NUM_QSPI_BL         (GPIO_NUM_1)
+// NEW (good - use pincfg.h):
+#define EXAMPLE_PIN_NUM_QSPI_CS         ((gpio_num_t)TFT_CS)
+#define EXAMPLE_PIN_NUM_QSPI_PCLK       ((gpio_num_t)TFT_SCK)
+#define EXAMPLE_PIN_NUM_QSPI_DATA0      ((gpio_num_t)TFT_SDA0)
+#define EXAMPLE_PIN_NUM_QSPI_DATA1      ((gpio_num_t)TFT_SDA1)
+#define EXAMPLE_PIN_NUM_QSPI_DATA2      ((gpio_num_t)TFT_SDA2)
+#define EXAMPLE_PIN_NUM_QSPI_DATA3      ((gpio_num_t)TFT_SDA3)
+#define EXAMPLE_PIN_NUM_QSPI_RST        ((gpio_num_t)TFT_RST)
+#define EXAMPLE_PIN_NUM_QSPI_DC         ((gpio_num_t)TFT_DC)
+#define EXAMPLE_PIN_NUM_QSPI_TE         ((gpio_num_t)TFT_TE)
+#define EXAMPLE_PIN_NUM_QSPI_BL         ((gpio_num_t)TFT_BLK)
 
-#define EXAMPLE_PIN_NUM_QSPI_TOUCH_SCL  (GPIO_NUM_8)
-#define EXAMPLE_PIN_NUM_QSPI_TOUCH_SDA  (GPIO_NUM_4)
-#define EXAMPLE_PIN_NUM_QSPI_TOUCH_RST  (-1)
-#define EXAMPLE_PIN_NUM_QSPI_TOUCH_INT  (-1)
+#define EXAMPLE_PIN_NUM_QSPI_TOUCH_SCL  ((gpio_num_t)TOUCH_PIN_NUM_I2C_SCL)
+#define EXAMPLE_PIN_NUM_QSPI_TOUCH_SDA  ((gpio_num_t)TOUCH_PIN_NUM_I2C_SDA)
+#define EXAMPLE_PIN_NUM_QSPI_TOUCH_RST  ((gpio_num_t)TOUCH_PIN_NUM_RST)
+#define EXAMPLE_PIN_NUM_QSPI_TOUCH_INT  ((gpio_num_t)TOUCH_PIN_NUM_INT)
+
+// SD card pins from pincfg.h
+#define SD_MMC_PIN_D0 ((gpio_num_t)SD_MMC_D0)
+#define SD_MMC_PIN_CLK ((gpio_num_t)SD_MMC_CLK)
+#define SD_MMC_PIN_CMD ((gpio_num_t)SD_MMC_CMD)
 
 #ifdef __cplusplus
 extern "C" {
@@ -115,6 +120,45 @@ bool bsp_display_lock(uint32_t timeout_ms);
  *
  */
 void bsp_display_unlock(void);
+
+/**
+ * @brief Init SD card
+ *
+ * @return
+ *      - ESP_OK                On success
+ *      - ESP_ERR_INVALID_ARG   SD card parameter error
+ *      - ESP_FAIL              SD card installation error
+ *
+ */
+esp_err_t bsp_sd_init(void);
+
+/**
+ * @brief Deinit SD card and free its resources
+ *
+ * @return
+ *      - ESP_OK                On success
+ *      - ESP_ERR_INVALID_ARG   SD card parameter error
+ *
+ */
+esp_err_t bsp_sd_deinit(void);
+
+/**
+ * @brief Check if SD card is mounted
+ *
+ * @return
+ *      - true                 SD card is mounted
+ *      - false                SD card is not mounted
+ */
+bool bsp_sd_is_mounted(void);
+
+/**
+ * @brief Get the mount point of the SD card
+ *
+ * @return
+ *      - const char*         Mount point of the SD card
+ *      - NULL                 SD card is not mounted
+ */
+const char *bsp_sd_get_mount_point(void);
 
 #ifdef __cplusplus
 }

@@ -24,10 +24,14 @@
 #include "esp_rom_gpio.h"
 #include "esp_lcd_axs15231b.h"
 #include "bsp_err_check.h"
+#include "pincfg.h"
 
 #include "lv_port.h"
 #include "display.h"
 #include "esp_bsp.h"
+#include "esp_vfs_fat.h"
+#include "driver/sdmmc_host.h"
+#include "sdmmc_cmd.h"
 
 static const char *TAG = "example";
 
@@ -536,4 +540,82 @@ bool bsp_display_lock(uint32_t timeout_ms)
 void bsp_display_unlock(void)
 {
     lvgl_port_unlock();
+}
+
+typedef struct {
+    bool mounted;
+    char mount_point[16];
+} bsp_sd_ctx_t;
+
+static bsp_sd_ctx_t sd_ctx = { .mounted = false, .mount_point = "/sd" };
+
+esp_err_t bsp_sd_init(void)
+{
+    ESP_LOGI(TAG, "Initializing SD card");
+
+    if (sd_ctx.mounted)
+    {
+        return ESP_OK;
+    }
+
+    sdmmc_host_t host = SDMMC_HOST_DEFAULT();
+    host.max_freq_khz = SDMMC_FREQ_HIGHSPEED;
+
+    // ✅ CORRECT ESP-IDF field names for sdmmc_slot_config_t
+    sdmmc_slot_config_t slot_config = {
+        .width = 1,
+        .clk = SD_MMC_PIN_CLK, // GPIO 12 (not clk_io_num)
+        .cmd = SD_MMC_PIN_CMD, // GPIO 11 (not cmd_io_num)
+        .d0 = SD_MMC_PIN_D0,   // GPIO 13 (not d0_io_num)
+        .d1 = -1,
+        .d2 = -1,
+        .d3 = -1,
+        .gpio_cd = -1,
+        .gpio_wp = -1};
+
+    esp_vfs_fat_sdmmc_mount_config_t mount_config = {
+        .format_if_mount_failed = false,
+        .max_files = 5,
+        .allocation_unit_size = 16 * 1024};
+
+    sdmmc_card_t *card = NULL;
+    esp_err_t ret = esp_vfs_fat_sdmmc_mount(sd_ctx.mount_point, &host, &slot_config, &mount_config, &card);
+    if (ret != ESP_OK)
+    {
+        ESP_LOGE(TAG, "Failed to mount SD card: %s", esp_err_to_name(ret));
+        return ret;
+    }
+
+    sd_ctx.mounted = true;
+    ESP_LOGI(TAG, "✓ SD card mounted at %s", sd_ctx.mount_point);
+    ESP_LOGI(TAG, "Card size: %llu MB", card ? ((uint64_t)card->csd.capacity * card->csd.sector_size / (1024 * 1024)) : 0);
+    return ESP_OK;
+}
+
+esp_err_t bsp_sd_deinit(void)
+{
+    if (!sd_ctx.mounted) {
+        return ESP_OK;
+    }
+
+    esp_err_t ret = esp_vfs_fat_sdmmc_unmount();
+    if (ret != ESP_OK) {
+        ESP_LOGE(TAG, "Failed to unmount SD card: %s", esp_err_to_name(ret));
+        return ret;
+    }
+
+    sd_ctx.mounted = false;
+    ESP_LOGI(TAG, "SD card unmounted");
+
+    return ESP_OK;
+}
+
+bool bsp_sd_is_mounted(void)
+{
+    return sd_ctx.mounted;
+}
+
+const char *bsp_sd_get_mount_point(void)
+{
+    return sd_ctx.mount_point;
 }

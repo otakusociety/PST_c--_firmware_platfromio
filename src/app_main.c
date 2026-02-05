@@ -11,91 +11,59 @@
 #include "pst_file_browser.h"
 #include "pst_keyboard.h"
 
-#define LVGL_PORT_ROTATION_DEGREE (90)
+static const char *TAG = "EXPLORER_TEST";
 
-static const char *TAG = "APP_MAIN";
-
-// Simple hook for now: in the future this will open the editor on PST
-static void on_file_selected(const char *full_path)
+// This callback runs when you pick a file in the explorer
+void my_file_picker_callback(const char *full_path)
 {
-    ESP_LOGI(TAG, "Selected file for edit: %s", full_path);
-}
-
-// Keyboard callback: demonstrates integration
-static void on_keyboard_done(const char *text, bool submitted)
-{
-    if (submitted && text)
+    if (full_path)
     {
-        ESP_LOGI(TAG, "Keyboard submitted: '%s'", text);
-        // Future: pass text to file editor or file browser for new file creation
+        ESP_LOGI(TAG, "SUCCESS! You selected: %s", full_path);
+        // Here you would typically open the file or play the music/image
     }
     else
     {
-        ESP_LOGI(TAG, "Keyboard cancelled");
+        ESP_LOGW(TAG, "File selection was cancelled or failed.");
     }
 }
 
 void app_main(void)
 {
-    ESP_LOGI(TAG, "=== SD File Browser Starting ===");
+    ESP_LOGI(TAG, "Initializing System...");
 
-    esp_err_t ret = esp_psram_init();
-    if (ret != ESP_OK)
-    {
-        ESP_LOGE(TAG, "PSRAM init failed: %s", esp_err_to_name(ret));
-        return;
-    }
-
+    // 1. Initialize the Display
+    // Using default BSP config, adjust rotation if your screen is upside down
     bsp_display_cfg_t cfg = {
         .lvgl_port_cfg = ESP_LVGL_PORT_INIT_CONFIG(),
         .buffer_size = EXAMPLE_LCD_QSPI_H_RES * EXAMPLE_LCD_QSPI_V_RES,
-#if LVGL_PORT_ROTATION_DEGREE == 90
         .rotate = LV_DISP_ROT_90,
-#endif
     };
-
-    lv_disp_t *disp = bsp_display_start_with_config(&cfg);
-    if (!disp)
-    {
-        ESP_LOGE(TAG, "Display init failed");
-        return;
-    }
-
-    lv_coord_t scr_width = lv_disp_get_hor_res(disp);
-    lv_coord_t scr_height = lv_disp_get_ver_res(disp);
-    ESP_LOGI(TAG, "Display: %dx%d", scr_width, scr_height);
-
+    bsp_display_start_with_config(&cfg);
     bsp_display_backlight_on();
 
-    vTaskDelay(pdMS_TO_TICKS(500));
-    ret = bsp_sd_init();
+    // 2. Initialize the SD Card (CRITICAL)
+    // The File Explorer will show an empty list if the SD isn't mounted
+    ESP_LOGI(TAG, "Mounting SD Card...");
+    esp_err_t ret = bsp_sd_init();
     if (ret != ESP_OK)
     {
-        ESP_LOGW(TAG, "SD init failed: %s", esp_err_to_name(ret));
-    }
-    else
-    {
-        ESP_LOGI(TAG, "SD mounted: %s", bsp_sd_get_mount_point());
+        ESP_LOGE(TAG, "Failed to mount SD card! Check your wiring/card.");
     }
 
-    vTaskDelay(pdMS_TO_TICKS(100));
-    // Root the browser at the SD mount point for Edit Mode
-    pst_file_browser_create(bsp_sd_get_mount_point(), on_file_selected);
+    // 3. Launch the Browser
+    // "S:" is the drive letter we set in lv_conf.h
+    ESP_LOGI(TAG, "Launching File Browser...");
+    pst_file_browser_create("S:", my_file_picker_callback);
 
-    // Example: Show keyboard on startup (optional demo)
-    // Uncomment to test:
-    // vTaskDelay(pdMS_TO_TICKS(500));
-    // pst_keyboard_create("Enter filename:", on_keyboard_done);
-
+    // 4. Main Loop
     while (1)
     {
+        // Run LVGL timers
+        uint32_t ms_to_next = lv_timer_handler();
 
-
-
-
-}   
-
-    lv_timer_handler();
-       vTaskDelay(pdMS_TO_TICKS(5));
-    
+        // Use the returned time to sleep efficiently
+        if (ms_to_next == 0)
+            ms_to_next = 1;
+        vTaskDelay(pdMS_TO_TICKS(ms_to_next));
+    }
 }

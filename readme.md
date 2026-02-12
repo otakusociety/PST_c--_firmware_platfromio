@@ -1,4 +1,4 @@
-# AI Coding Instructions for PST Firmware
+
 
 ## Project Overview
 **Portable Scripting Terminal (PST)** - 

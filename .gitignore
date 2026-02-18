@@ -6,3 +6,5 @@
 .github
 documentation
 build
+preview-build
+preview-bin

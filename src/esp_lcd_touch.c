@@ -61,14 +61,22 @@ esp_err_t esp_lcd_touch_read_data(esp_lcd_touch_handle_t tp)
 bool esp_lcd_touch_get_coordinates(esp_lcd_touch_handle_t tp, uint16_t *x, uint16_t *y, uint16_t *strength, uint8_t *point_num, uint8_t max_point_num)
 {
     bool touched = false;
-
     assert(tp != NULL);
     assert(x != NULL);
     assert(y != NULL);
     assert(tp->get_xy != NULL);
 
     touched = tp->get_xy(tp, x, y, strength, point_num, max_point_num);
-    if (!touched) {
+
+#if CONFIG_ESP_LCD_TOUCH_SUPPORT_LOG
+    if (touched && *point_num > 0)
+    {
+        ESP_LOGI("TOUCH", "Raw: x=%d y=%d strength=%d points=%d", x[0], y[0], strength ? strength[0] : 0, *point_num);
+    }
+#endif
+
+    if (!touched)
+    {
         return false;
     }
 

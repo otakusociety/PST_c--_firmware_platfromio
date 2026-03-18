@@ -22,7 +22,7 @@ static void btn_delete_event_cb(lv_event_t *e)
 {
     char *name = lv_obj_get_user_data(lv_event_get_target(e));
     if (name)
-        lv_mem_free(name);
+        lv_free(name);
 }
 
 static void on_search_finished(const char *text, bool submitted)
@@ -126,7 +126,7 @@ static void refresh_list(void)
 
     char fn[256];
     uint32_t items_found = 0;
-    while (lv_fs_dir_read(&dir, fn) == LV_FS_RES_OK)
+    while (lv_fs_dir_read(&dir, fn, sizeof(fn)) == LV_FS_RES_OK)
     {
         if (fn[0] == '\0')
             break;
@@ -138,7 +138,7 @@ static void refresh_list(void)
 
         items_found++;
         lv_obj_t *btn = lv_list_add_btn(s_list, is_dir ? LV_SYMBOL_DIRECTORY : LV_SYMBOL_FILE, entry_name);
-        char *name_copy = lv_mem_alloc(strlen(entry_name) + 1);
+        char *name_copy = lv_malloc(strlen(entry_name) + 1);
         if (name_copy)
         {
             strcpy(name_copy, entry_name);

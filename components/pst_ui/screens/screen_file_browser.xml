@@ -1,0 +1,13 @@
+<!-- screens/screen_file_browser.xml -->
+<screen>
+    <view flex_flow="column" style_pad_all="16" style_bg_color="0xffffff">
+        <!-- Label to show selected file -->
+        <lv_label bind_text="selected_file" style_text_color="0x000000" style_text_font="font_medium"/>
+
+        <!-- Button to open file browser -->
+        <lv_button width="200" height="50" style_bg_color="0x0077ff" style_radius="8">
+            <lv_label text="Open File Browser" style_text_color="0xffffff"/>
+            <event_cb callback="my_file_picker_callback" trigger="clicked"/>
+        </lv_button>
+    </view>
+</screen>
